@@ -70,10 +70,32 @@ bin/rails server
 
 ## Testing
 
-Run the test suite:
+### Running the Test Suite
+Run the RSpec test suite:
 ```bash
 bundle exec rspec
 ```
+
+### Testing API Endpoints
+A test script is provided to verify all API endpoints functionality:
+
+```bash
+chmod +x test_api.sh
+./test_api.sh
+```
+
+This script will:
+1. Ensure Docker containers are running
+2. Verify the health endpoint functionality
+3. Check Swagger API documentation accessibility
+4. Test all API endpoints with proper request/response formats:
+   - List all opportunities (GET /api/v1/opportunities)
+   - Test pagination (GET /api/v1/opportunities?page=1&per_page=2)
+   - Test search functionality (GET /api/v1/opportunities?search=Developer)
+   - Create a new opportunity (POST /api/v1/opportunities)
+   - Apply for an opportunity (POST /api/v1/opportunities/:id/apply)
+
+The script formats JSON responses for better readability and handles errors appropriately.
 
 ## API Documentation
 

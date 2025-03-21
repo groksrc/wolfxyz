@@ -9,8 +9,7 @@ class HealthController < ApplicationController
         database: database_connected?,
         redis: redis_connected?,
         sidekiq: sidekiq_running?
-      },
-      version: Rails.application.config.version
+      }
     }
 
     render json: health_status

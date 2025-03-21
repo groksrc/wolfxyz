@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::API
   include ActionController::MimeResponds
 
-  before_action :authenticate_request, unless: -> { Rails.env.test? }
+  before_action :authenticate_request, unless: -> { Rails.env.test? || Rails.env.development? }
 
   private
 
