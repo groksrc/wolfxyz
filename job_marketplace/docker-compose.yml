@@ -1,0 +1,82 @@
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: job_marketplace_development
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        RUBY_VERSION: 3.4.2
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/job_marketplace_development
+      - SSL_KEY_PATH=/rails/config/ssl/localhost.key
+      - SSL_CERT_PATH=/rails/config/ssl/localhost.crt
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/rails
+      - ./config/ssl:/rails/config/ssl
+    command: bin/rails server -b 'ssl://0.0.0.0?key=/rails/config/ssl/localhost.key&cert=/rails/config/ssl/localhost.crt'
+    stdin_open: true
+    tty: true
+    healthcheck:
+      test: ["CMD", "bin/rails", "runner", "puts Net::HTTP.new('localhost', 3000, nil, nil, nil, nil, use_ssl: true, verify_mode: OpenSSL::SSL::VERIFY_NONE).get('/up').code"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  sidekiq:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        RUBY_VERSION: 3.4.2
+    depends_on:
+      - postgres
+      - redis
+      - web
+    environment:
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/job_marketplace_development
+    volumes:
+      - .:/rails
+      - ./config/ssl:/rails/config/ssl
+    command: bundle exec sidekiq
+    stdin_open: true
+    tty: true
+
+volumes:
+  postgres-data:
+  redis-data:

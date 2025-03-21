@@ -18,3 +18,9 @@
 - **Documentation**: Comment complex algorithms and implementation choices
 - **Performance**: Prioritize O(1) operations and memory efficiency
 - **Error messages**: Provide clear, specific error messages
+
+## Commit Guidelines
+- Write clear, concise commit messages
+- Focus on why the change was made, not just what was changed
+- Do not include attribution or tool information in commit messages
+- No signatures, co-authors, or tool mentions in commits

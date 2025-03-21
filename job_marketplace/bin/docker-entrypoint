@@ -1,0 +1,30 @@
+#!/bin/bash -e
+
+# Enable jemalloc for reduced memory usage and latency.
+if [ -z "${LD_PRELOAD+x}" ]; then
+    LD_PRELOAD=$(find /usr/lib -name libjemalloc.so.2 -print -quit)
+    export LD_PRELOAD
+fi
+
+# Check for SSL certificates in development environment
+if [ "$RAILS_ENV" = "development" ]; then
+  if [ ! -f "$SSL_KEY_PATH" ] || [ ! -f "$SSL_CERT_PATH" ]; then
+    echo "SSL certificates not found. Generating self-signed certificates..."
+    mkdir -p $(dirname "$SSL_KEY_PATH")
+    
+    openssl req -x509 -sha256 -nodes -newkey rsa:2048 -days 365 \
+      -keyout "$SSL_KEY_PATH" -out "$SSL_CERT_PATH" \
+      -subj "/CN=localhost/O=JobMarketplace/C=US"
+      
+    echo "SSL certificates generated successfully."
+  else
+    echo "Using existing SSL certificates."
+  fi
+fi
+
+# If running the rails server then create or migrate existing database
+if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+  ./bin/rails db:prepare
+fi
+
+exec "${@}"

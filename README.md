@@ -1,125 +1,82 @@
-# INTERVIEW
+# Wolf - Ruby on Rails Staff Engineer Technical Assessment
 
----
+This repository contains my solutions to the two-part Ruby on Rails Staff Engineer Technical Assessment.
 
-# **Wolf - Ruby on Rails Staff Engineer Technical Assessment**
+## Overview
 
-**Duration:** 3 - 4 hours
+The assessment consists of two main parts:
 
-**Format:** Submit code via GitHub (or similar) with README explaining decisions.
+1. **Rate Limiter Implementation** - An algorithmic challenge to implement an efficient rate limiter in Ruby.
+2. **Job Marketplace API** - A Rails application implementing a job marketplace with various performance optimizations.
 
----
+## Part 1: Rate Limiter
 
-## **1. Algorithmic Challenge: Rate Limiter (Leetcode Medium-Hard Level)**
+The rate limiter implements a sliding window approach to efficiently throttle API requests. Key features include:
 
-**Problem Statement:**
+- O(1) time complexity for request validation
+- Thread-safe implementation for concurrent access
+- Memory-efficient storage using optimized data structures
+- Automatic cleanup of inactive users
 
-Your task is to **implement a rate limiter** for API requests in Ruby. Given a stream of incoming API requests in the form of:
+### Directory Structure
 
-```ruby
-[
-  { timestamp: 1700000010, user_id: 1 },
-  { timestamp: 1700000011, user_id: 2 },
-  { timestamp: 1700000020, user_id: 1 },
-  { timestamp: 1700000035, user_id: 1 },
-  { timestamp: 1700000040, user_id: 1 }
-]
+All code for the rate limiter is contained in the `rate_limiter` directory.
 
+### Running Tests
+
+```bash
+cd rate_limiter
+bundle install
+bundle exec rspec
 ```
 
-Each **user_id** is allowed a maximum of **3 requests per 30 seconds**.
+## Part 2: Job Marketplace API
 
-Write a Ruby class `RateLimiter` that implements:
+The Job Marketplace API is a Ruby on Rails application that provides the following features:
 
-```ruby
-class RateLimiter
-  def initialize(time_window, max_requests)
-    # initialize your storage
-  end
+- RESTful API endpoints for managing job opportunities
+- PostgreSQL database with optimized queries and proper indexing
+- Redis caching for improved search performance
+- Background job processing with Sidekiq
+- Swagger API documentation
+- Docker containerization
+- TLS/HTTPS support for local development
 
-  def allow_request?(timestamp, user_id)
-    # returns true if request is allowed, false otherwise
-  end
-end
+### Directory Structure
 
+All code for the job marketplace API is contained in the `job_marketplace` directory.
+
+### Running the Application
+
+```bash
+cd job_marketplace
+docker-compose up -d
 ```
 
-### **Expectations:**
+The API will be available at https://localhost:3000 and the Swagger documentation at https://localhost:3000/api-docs.
 
-- **Efficient implementation** (O(1) or O(logN) operations)
-- **Scalability** (Handle millions of users)
-- Use a **sliding window approach** (not fixed window).
-- Provide **test cases** using RSpec.
+## Implementation Decisions
 
-### **Evaluation Criteria:**
+### Rate Limiter
 
-✔️ Correctness (Does it correctly allow/block requests?)
+- Used a circular buffer approach for O(1) time complexity
+- Implemented thread safety with mutex locks
+- Added automatic cleanup to prevent memory leaks
+- Provided comprehensive test coverage
 
-✔️ Performance (Does it scale well with high request volumes?)
+### Job Marketplace API
 
-✔️ Readability (Is the code clear and maintainable?)
+- Implemented eager loading to fix N+1 query issues
+- Used Redis for caching frequent searches
+- Added proper database indexes for performance
+- Implemented background processing for notifications
+- Added Docker containerization for easy setup
+- Configured TLS for secure local development
 
----
+## Testing
 
-## **2. Rails Deep-Dive: Job Marketplace API & Optimization**
+Both parts of the assessment include comprehensive test suites with high coverage. The tests demonstrate the correctness and performance of the implementations.
 
-**Problem Statement:**
+## License
 
-You need to **build a small API for job seekers**. Implement the following in a Rails application:
-
-### **Models**
-
-### **Opportunity Model**
-
-```ruby
-class Opportunity < ApplicationRecord
-  belongs_to :client
-  has_many :applications
-  validates :title, :description, :salary, presence: true
-end
-
-```
-
-### **Client Model**
-
-```ruby
-class Client < ApplicationRecord
-  has_many :opportunities
-end
-
-```
-
-### **JobApplication Model**
-
-```ruby
-class JobApplication < ApplicationRecord
-  belongs_to :job_seeker
-  belongs_to :opportunity
-end
-
-```
-
-### **Tasks**
-
-1. **API Endpoints (CRUD)**
-    - Implement `GET /opportunities` (with pagination & search)
-    - Implement `POST /opportunities` (clients can create jobs)
-    - Implement `POST /opportunities/:id/apply` (job seekers apply)
-2. **Optimize N+1 Queries**
-    - Fix N+1 problems when fetching `opportunities` with `client_name`.
-3. **Background Job**
-    - Use **Sidekiq** to send a notification when a job seeker applies.
-4. **Performance**
-    - Use **caching** (e.g., Redis fragment caching) to speed up opportunity search.
-5. **Testing**
-    - Provide RSpec tests for API endpoints.
-
-### **Expectations:**
-
-✔️ **Efficient Queries** (No N+1 problems, correct indexes)
-
-✔️ **Modular Code** (Uses services for business logic, not controllers)
-
-✔️ **Background Job** (Sidekiq usage)
-
-✔️ **Good Test Coverage**
+All rights reserved. This code is proprietary and confidential. Unauthorized copying, distribution, modification, public display, or public performance of this proprietary work is strictly prohibited.
